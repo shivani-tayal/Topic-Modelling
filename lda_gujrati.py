@@ -161,8 +161,6 @@ class DivyaCorpus(object):
         return self.clip_docs
 
 
-# In[28]:
-
 
 # create a stream of bag-of-words vectors
 divya_corpus = DivyaCorpus(file_path, id2word_gujrati)
@@ -182,14 +180,8 @@ dictionary = gensim.corpora.Dictionary('')
 
 # # Load corpus and dictionary
 
-# In[50]:
-
-
 print(mm_corpus)
 print("Training the Model")
-
-# In[55]:
-
 
 corpus = gensim.corpora.MmCorpus("./model_data/divya_bow.mm")
 dictionary = gensim.corpora.Dictionary.load("./model_data/divya_dictionary")
@@ -206,19 +198,4 @@ gensim.models.LdaModel(corpus, num_topics=10, id2word=dictionary, chunksize=1000
 
 lda_model.save("./model_data/lda_model_improved")
 
-# In[66]:
-
-
-a = dictionary.itervalues()
-
-# In[67]:
-
-
-for i in a:
-    print(i)
-
-# In[ ]:
-
-
-dictionary
 
