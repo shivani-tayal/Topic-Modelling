@@ -70,18 +70,16 @@ def remove_punctuation(text):
     return text.translate(tbl)
 
 
-# file_path = "/disk2/workspace/Raj/python_projects/divya_corpus_text/sampleDivyaData/divyaArticleRecord_50"
-# file_path = "/disk2/workspace/Raj/python_projects/divya_corpus_text/divya_corpus/divya_corpus.jsonl"
-file_path = "/disk2/workspace/Raj/python_projects/divya_corpus_text/divyaTextRecords/divya_latest_records.jsonl"
+file_path = "../python_projects/corpus/gujrati_latest_records.jsonl"
 
 
 def iter_corpus(dump_file):
     """Yield each article from the corpus dump, as a `(title, tokens)` 2-tuple.
     expects input format as json line
     sample recod:
-    {"storyid":"121358926",
+    {"storyid":"11234",
     "content":"તમે તમારી પ્રોફેશનલ લાઇફમાં પ્રગતિ કરવા માગતા હો  સફળતાનાં મનપસંદ મ્યુઝિક સાંભળવું   ચાલવા જવું વગેરે",
-    "slno":"4976355"}
+    "slno":"1234"}
     """
     with open(dump_file, 'rU') as f:
         for line in f:
@@ -92,52 +90,6 @@ def iter_corpus(dump_file):
             if len(tokens) < 30:
                 continue
             yield story_id, tokens
-
-
-# In[46]:
-
-
-stream = iter_corpus(file_path)
-for story_id, tokens in itertools.islice(iter_corpus(file_path), 2):
-    print(story_id, tokens[:10])  # print the article title and its first ten tokens
-
-# In[5]:
-
-
-# Creating a document stream using iter_corpus class
-doc_stream = (tokens for _, tokens in iter_corpus(file_path))
-
-# In[6]:
-
-
-# creating dictionary from a streamed corpus
-id2word_gujrati = gensim.corpora.Dictionary(doc_stream)
-print(id2word_gujrati)
-
-# In[49]:
-
-
-print(id2word_gujrati)
-print("Saving the entire dictionary before filtering")
-id2word_gujrati.save("./model_data/gu_dict_b4Filtering")
-
-# In[7]:
-
-
-# ignore words that appear in less than 20 documents or more than 10% documents
-id2word_gujrati.filter_extremes(no_below=20, no_above=0.1)
-print(id2word_gujrati)
-
-# In[25]:
-
-
-# save the filtered Dictionary
-print("Saving the filtered dictionary")
-id2word_gujrati.save_as_text("./model_data/divya_dictionary_text")
-id2word_gujrati.save("./model_data/divya_dictionary")
-
-
-# In[27]:
 
 
 class DivyaCorpus(object):
@@ -161,17 +113,40 @@ class DivyaCorpus(object):
         return self.clip_docs
 
 
+stream = iter_corpus(file_path)
+for story_id, tokens in itertools.islice(iter_corpus(file_path), 2):
+    print(story_id, tokens[:10])  # print the article title and its first ten tokens
+
+
+# Creating a document stream using iter_corpus class
+doc_stream = (tokens for _, tokens in iter_corpus(file_path))
+
+# creating dictionary from a streamed corpus
+id2word_gujrati = gensim.corpora.Dictionary(doc_stream)
+print(id2word_gujrati)
+
+
+print(id2word_gujrati)
+print("Saving the entire dictionary before filtering")
+id2word_gujrati.save("./model_data/gu_dict_b4Filtering")
+
+
+# ignore words that appear in less than 20 documents or more than 10% documents
+id2word_gujrati.filter_extremes(no_below=20, no_above=0.1)
+print(id2word_gujrati)
+
+# save the filtered Dictionary
+print("Saving the filtered dictionary")
+id2word_gujrati.save_as_text("./model_data/divya_dictionary_text")
+id2word_gujrati.save("./model_data/divya_dictionary")
+
 
 # create a stream of bag-of-words vectors
 divya_corpus = DivyaCorpus(file_path, id2word_gujrati)
 
-# In[29]:
-
 
 # Saving searlised corpus to disk for data consistency
 gensim.corpora.MmCorpus.serialize('divya_bow.mm', divya_corpus)
-
-# In[30]:
 
 
 # loading data from disk
@@ -188,12 +163,7 @@ dictionary = gensim.corpora.Dictionary.load("./model_data/divya_dictionary")
 print(corpus)
 print(dictionary)
 
-# In[54]:
-
-
-gensim.models.LdaModel(corpus, num_topics=10, id2word=dictionary, chunksize=1000000, passes=10)
-
-# In[37]:
+lda_model = gensim.models.LdaModel(corpus, num_topics=10, id2word=dictionary, chunksize=1000000, passes=10)
 
 
 lda_model.save("./model_data/lda_model_improved")
